@@ -1,0 +1,1 @@
+insert into "t_configuration"("code","default") values('TAX_COPY_ENABLED',false);

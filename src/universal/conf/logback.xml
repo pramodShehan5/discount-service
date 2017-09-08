@@ -1,0 +1,47 @@
+<configuration scan="true" scanPeriod="30 seconds" debug="false">
+    <jmxConfigurator />
+
+    <property name="LOG_PATH" value="${log.path}" />
+    <property name="LOG_PATH_OLD" value="${LOG_PATH}/old_logs" />
+    <property name="LOGFILES_TO_KEEP" value="30" />
+    <property name="DEFAULT_ROLLING_PATTERN" value="%d{yyyy-MM-dd}.zip" />
+    <property name="DEFAULT_ENCODER_PATTERN" value="%date{ISO8601} %level [%logger{32}] %m%n%xEx" />
+    <property name="SERVICE_NAME" value="compliance-service" />
+    <property name="VALIDATION_MARKER" value="COMPLIANCE_VALIDATION_LOG" />
+    <property name="VALIDATION_FILE_SUFFIX" value="validation" />
+
+    <appender name="NEW" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${SERVICE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH_OLD}/${SERVICE_NAME}.log-${DEFAULT_ROLLING_PATTERN}</fileNamePattern>
+            <maxHistory>${LOGFILES_TO_KEEP}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${DEFAULT_ENCODER_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="VALIDATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${SERVICE_NAME}-${VALIDATION_FILE_SUFFIX}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH_OLD}/${SERVICE_NAME}-${VALIDATION_FILE_SUFFIX}.log-${DEFAULT_ROLLING_PATTERN}</fileNamePattern>
+            <maxHistory>${LOGFILES_TO_KEEP}</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>${VALIDATION_MARKER}</marker>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+        <encoder>
+            <pattern>${DEFAULT_ENCODER_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="NEW"/>
+        <appender-ref ref="VALIDATION"/>
+    </root>
+</configuration>
