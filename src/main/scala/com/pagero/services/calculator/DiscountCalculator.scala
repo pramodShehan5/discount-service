@@ -15,13 +15,16 @@ trait DiscountCalculator {
   private val MAXIMUM_DISOUNTABLE_PRICE = 100000
 
   def calculate(customerId: Long, items: List[Item]): DiscountResult = {
-    val userDetailOption = Await.result(userDetail.checkUserDetail(customerId), Duration.Inf)
+    val itemPrice = (for(itemPrices <- items) yield itemPrices.price).sum
+    val userDetailOption = userDetail.checkUserDetail(customerId)
 
     userDetailOption match {
       case Some(userDetails) =>
-        Await.result(userDetail.updateUserDetail(customerId,1000), Duration.Inf)
+        Await.result(userDetail.updateUserDetail(customerId,(userDetailOption.get.price + itemPrice),
+          (userDetailOption.get.noTransactions + 1)), Duration.Inf)
         calculate(userDetails, items)
       case None =>
+        Await.result(userDetail.addUserDetail(UserDetail(1,1,itemPrice)), Duration.Inf)
         DiscountResult(None, List())//save the transaction details
     }
   }

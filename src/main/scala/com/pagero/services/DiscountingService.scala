@@ -23,8 +23,10 @@ trait DiscountingService extends ServiceApplication with DiscountingServiceInfo 
 
         println(result.toString)
 
-        Future(CalculateDiscountReply(result.generalDiscount,
-          result.itemDiscounts.map(resultItem => ItemDiscount(Option(resultItem.id), Option(resultItem.discount)))))
+        Future {
+          discountingServer.reply(CalculateDiscountReply(result.generalDiscount,
+            result.itemDiscounts.map(resultItem => ItemDiscount(Option(resultItem.id), Option(resultItem.discount)))))
+        }
     }
   }
 }

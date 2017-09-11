@@ -10,7 +10,7 @@ trait DbConf {
   val config = ConfigFactory.load("database.conf");
 
   lazy val dbName = Try(config.getString("psql.dbName")).getOrElse("postgres")
-  lazy val psqlHost = Try(config.getString("psql.host")).getOrElse("172.17.0.1")
+  lazy val psqlHost = Try(config.getString("localhost")).getOrElse("localhost")
   lazy val psqlPort = Try(config.getString("psql.port")).getOrElse("5432")
   lazy val psqlUser = Try(config.getString("psql.user")).getOrElse("postgres")
   lazy val psqlPassword = Try(config.getString("psql.password")).getOrElse("12345")
