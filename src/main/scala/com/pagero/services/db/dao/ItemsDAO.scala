@@ -1,5 +1,6 @@
 package com.pagero.services.db.dao
 
+import com.googlecode.flyway.core.Flyway
 import com.pagero.services.calculator.DbConf
 import com.pagero.services.db.model.{Item, Items}
 import slick.driver.PostgresDriver.api._

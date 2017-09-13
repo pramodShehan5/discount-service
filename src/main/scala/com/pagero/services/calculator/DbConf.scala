@@ -1,5 +1,6 @@
 package com.pagero.services.calculator
 
+import com.googlecode.flyway.core.Flyway
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import com.typesafe.config.ConfigFactory
 import slick.driver.PostgresDriver.api._
@@ -29,6 +30,13 @@ trait DbConf {
     ds.setIdleConnectionTestPeriod(300)
     ds.setMaxIdleTimeExcessConnections(240)
 
+    val flyway: Flyway = new Flyway()
+    flyway.setInitOnMigrate(true)
+    flyway.setDataSource(ds)
+    flyway.migrate()
+
     Database.forDataSource(ds)
   }
+
+
 }

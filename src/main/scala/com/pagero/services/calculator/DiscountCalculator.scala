@@ -13,23 +13,26 @@ trait DiscountCalculator {
   private val MINIMUM_DISOUNTABLE_TRANSACTIONS = 3
   private val MINIMUM_DISOUNTABLE_PRICE = 30000
   private val MAXIMUM_DISOUNTABLE_PRICE = 100000
+  private val DISOUNTABLE_ITEM_PRICE = 50000
 
   def calculate(customerId: Long, items: List[Item]): DiscountResult = {
-    val itemPrice = (for(itemPrices <- items) yield itemPrices.price).sum
-    val userDetailOption = userDetail.checkUserDetail(customerId)
+    val itemPrice = items.map(item => item.price).sum
+
+    val userDetailOption = userDetailDAO.checkUserDetail(customerId)
 
     userDetailOption match {
-      case Some(userDetails) =>
-        Await.result(userDetail.updateUserDetail(customerId,(userDetailOption.get.price + itemPrice),
-          (userDetailOption.get.noTransactions + 1)), Duration.Inf)
-        calculate(userDetails, items)
+      case Some(userDetail) =>
+        Await.result(userDetailDAO.updateUserDetail(customerId,
+          userDetail.price + itemPrice,
+          userDetail.noTransactions + 1), Duration.Inf)
+        calculate(userDetail, items)
       case None =>
-        Await.result(userDetail.addUserDetail(UserDetail(1,1,itemPrice)), Duration.Inf)
-        DiscountResult(None, List())//save the transaction details
+        Await.result(userDetailDAO.addUserDetail(UserDetail(1, 1, itemPrice)), Duration.Inf)
+        DiscountResult(None, List()) //save the transaction details
     }
   }
 
-  private def calculate(userDetail: UserDetail, items: List[Item]) = {
+  def calculate(userDetail: UserDetail, items: List[Item]): DiscountResult = {
     if (userDetail.noTransactions <= MINIMUM_DISOUNTABLE_TRANSACTIONS) {
 
       DiscountResult(Option(NONE_DISCOUNT))
@@ -52,7 +55,7 @@ trait DiscountCalculator {
 
     items.map(item =>
       ItemWiseDiscount(item.id,
-        if (item.price >= 50000) {
+        if (item.price >= DISOUNTABLE_ITEM_PRICE) {
           MAXIMUM_DISCOUNT
         } else {
           SECONDARY_DISCOUNT

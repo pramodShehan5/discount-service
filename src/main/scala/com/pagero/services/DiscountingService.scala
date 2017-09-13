@@ -19,7 +19,19 @@ trait DiscountingService extends ServiceApplication with DiscountingServiceInfo 
   discountingServer addMessageHandler {
     implicit ctx => {
       case msg: CalculateDiscountMessage =>
-        val result = calculator.calculate(msg.userid.get,msg.items.map(item => Item(item.id.get, item.name.get, item.price.get)).toList)
+
+        for {
+          userId <- msg.userid
+        } yield calculator.calculate(userId, msg.items.flatMap(
+          item => for {
+            id <- item.id
+            name <- item.name
+            price <- item.price
+          } yield Item(id, name, price)).toList)
+
+        val result = calculator.calculate(
+          msg.userid.get
+          , msg.items.map(item => Item(item.id.get, item.name.get, item.price.get)).toList)
 
         println(result.toString)
 

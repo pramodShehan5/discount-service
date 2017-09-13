@@ -1,10 +1,12 @@
 package com.pagero.services
 
+import com.googlecode.flyway.core.Flyway
 import com.pagero.services.calculator.{DefaultDBDependency, DiscountCalculator}
 import com.pagero.services.discounting.spec.DiscountingSpec
 
 
 object Main extends DiscountingService  {
+
 
   lazy override val discountingServer = createServer(DiscountingSpec)
 
